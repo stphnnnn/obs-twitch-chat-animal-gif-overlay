@@ -4,83 +4,86 @@ const DOG_API = "https://api.thedogapi.com/v1/images/search?mime_types=gif";
 const PAUSE_DURATION = 30 * 1000; // 30 seconds
 const DISPLAY_DURATION = 10 * 1000; // 10 seconds
 
-// Connect to Twitch chat
-const client = new tmi.client({
-  channels: [TWITCH_CHANNEL],
-});
+// Resolve promise after duration
+const wait = async duration => {
+  return new Promise(resolve => setTimeout(resolve, duration));
+};
 
-client.connect();
-client.on("message", handleMessage);
 
+// Loops and calls each function in a queue
+function Queue() {
+  let queue = [];
+  let isLooping = false;
+  let isPaused = false;
+
+  this.loop = async () => {
+    isLooping = true;
+
+    const item = queue[0];
+    queue.shift();
+    await item();
+
+    if (!queue.length || isPaused) {
+      isLooping = false;
+      return;
+    }
+
+    this.loop();
+  };
+
+  this.add = item => {
+    if (isPaused) return;
+
+    queue.push(item);
+
+    if (!isLooping) this.loop();
+  };
+
+  this.clear = () => {
+    queue = [];
+  };
+
+  this.pause = (duration = 0) => {
+    isPaused = true;
+    setTimeout(() => (isPaused = false), duration);
+  };
+
+  this.isLooping = isLooping;
+}
+
+const queue = new Queue();
 const gifContainer = document.querySelector(".gif");
-gifContainer.style.opacity = 0;
 
-let gifQueue = [];
-let isPaused = false;
-let isDisplayingQueue = false;
+const add = apiUrl => {
+  queue.add(async () => {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
 
-async function handleMessage(channel, tags, message) {
-  if (message.toLowerCase() === "!catpls") {
-    await addGifToQueue(CAT_API);
+    gifContainer.innerHTML = `<img src="${data[0].url}" />`;
+    gifContainer.style.opacity = 1;
 
-    if (!isDisplayingQueue) {
-      displayGifsInQueue();
+    await wait(DISPLAY_DURATION);
+
+    if (!queue.isLooping) {
+      gifContainer.style.opacity = 0;
     }
-  }
+  });
+};
 
-  if (message.toLowerCase() === "!dogpls") {
-    await addGifToQueue(DOG_API);
-
-    if (!isDisplayingQueue) {
-      displayGifsInQueue();
-    }
-  }
+const handleMessage = (_, tags, message) => {
+  if (message.toLowerCase() === "!catpls") add(CAT_API);
+  if (message.toLowerCase() === "!dogpls") add(DOG_API);
 
   // Allow mods or broadcasters to pause the GIFs
   const isModOrBroadcaster = tags.badges.broadcaster || tags.mod;
   if (isModOrBroadcaster && message.toLowerCase() === "!stoppls") {
-    pauseGifDisplay();
+    // Clear GIF queue and pause for PAUSE_DURATION
+    queue.clear();
+    queue.pause(PAUSE_DURATION);
   }
-}
-
-const addGifToQueue = async (apiUrl) => {
-  if (isPaused) {
-    return;
-  }
-
-  const response = await fetch(apiUrl);
-  const data = await response.json();
-  const gif = data[0].url;
-
-  return gifQueue.push(gif);
 };
 
-const displayGifsInQueue = () => {
-  if (!gifQueue.length || isPaused) {
-    isDisplayingQueue = false;
-    return;
-  }
-
-  isDisplayingQueue = true;
-
-  gifContainer.innerHTML = `<img src="${gifQueue[0]}" />`;
-  gifContainer.style.opacity = 1;
-
-  // Stops displaying after DISPLAY_DURATION and check the queue again
-  displayTimer = setTimeout(() => {
-    gifQueue.shift(); // Removes the displayed GIF from the queue
-    gifContainer.style.opacity = 0;
-    displayGifsInQueue();
-  }, DISPLAY_DURATION);
-};
-
-// Clear GIF queue and enable paused state
-const pauseGifDisplay = () => {
-  gifQueue = [];
-  isPaused = true;
-
-  // Un-pause GIF displaying after PAUSE_DURATION
-  setTimeout(() => {
-    isPaused = false;
-  }, PAUSE_DURATION);
-};
+// Connect to Twitch chat
+const client = new tmi.client({ channels: [TWITCH_CHANNEL] });
+client.connect();
+client.on("message", handleMessage);
