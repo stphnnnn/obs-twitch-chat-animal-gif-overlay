@@ -14,7 +14,9 @@ The project uses:
 
 2. Extract the .zip
 
-3. Add the `index.html` as a [browser source](https://obsproject.com/wiki/Sources-Guide#browsersource) in OBS
+3. Change the TWITCH_CHANNEL variable to the name of your Twitch channel
+
+4. Add the `index.html` as a [browser source](https://obsproject.com/wiki/Sources-Guide#browsersource) in OBS
 
 ## Available commands
 
