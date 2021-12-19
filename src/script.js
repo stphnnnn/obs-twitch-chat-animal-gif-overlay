@@ -24,7 +24,13 @@ const getParam = (param) => {
 };
 
 // Connect to Twitch chat
-const client = new tmi.client({ channels: [getParam("channel")] });
+const client = new tmi.client({
+  channels: [getParam("channel")],
+  connection: {
+    secure: true,
+  },
+});
+
 client.connect();
 
 client.on("message", (channel, tags, message) => {
