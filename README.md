@@ -10,13 +10,9 @@ The project uses:
 
 ## How to use
 
-1. Download the [latest version](https://github.com/stphnnnn/obs-twitch-chat-animal-gif-overlay/archive/master.zip)
+Add the `https://twitch-gif-overlay.vercel.app/?channel=YOUR_TWITCH_CHANNEL_NAME` as a [browser source](https://obsproject.com/wiki/Sources-Guide#browsersource) in OBS.
 
-2. Extract the .zip
-
-3. Change the TWITCH_CHANNEL variable to the name of your Twitch channel
-
-4. Add the `index.html` as a [browser source](https://obsproject.com/wiki/Sources-Guide#browsersource) in OBS
+Example: `https://twitch-gif-overlay.vercel.app/?channel=stphnnnnn`
 
 ## Available commands
 
