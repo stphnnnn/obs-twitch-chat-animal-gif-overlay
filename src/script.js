@@ -20,8 +20,7 @@ const gifQueue = new Queue({
 
 const getParam = (param) => {
   const url = new URL(window.location.href);
-  const param = url.searchParams.get(param);
-  return param;
+  return url.searchParams.get(param);
 };
 
 // Connect to Twitch chat
