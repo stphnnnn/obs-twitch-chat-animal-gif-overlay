@@ -3,11 +3,8 @@ const DISPLAY_DURATION = 10 * 1000; // 10 seconds
 
 const gifQueue = new Queue({
   onAdd: (url) => async () => {
-    const response = await fetch(url);
-    const data = await response.json();
-
     const gifContainer = document.querySelector(".gif");
-    gifContainer.innerHTML = `<img src="${data[0].url}" />`;
+    gifContainer.innerHTML = `<img src="${url}" />`;
     gifContainer.style.opacity = 1;
 
     await new Promise((resolve) => setTimeout(resolve, DISPLAY_DURATION));
@@ -23,23 +20,15 @@ const getParam = (param) => {
   return url.searchParams.get(param);
 };
 
-// Connect to Twitch chat
-const client = new tmi.client({
-  channels: [getParam("channel")],
-  connection: {
-    secure: true,
-  },
-});
-
-client.connect();
-
-client.on("message", (channel, tags, message) => {
-  handlers.forEach((handler) => {
-    if (
-      message.startsWith(handler.command) &&
-      handler.condition(tags, message)
-    ) {
-      handler.handler(tags, message);
+// Command handlers
+ComfyJS.onCommand = (user, command, message, flags, extra) => {
+  commands.forEach((command) => {
+    if (command.command === command) {
+      if (command.condition(message, flags, extra)) {
+        command.handler(message, flags, extra);
+      }
     }
   });
-});
+};
+
+ComfyJS.Init(getParam("channel"));
