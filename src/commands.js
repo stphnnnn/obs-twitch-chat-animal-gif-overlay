@@ -15,7 +15,7 @@ const commands = [
     condition: () => true,
     handler: async () => {
       const response = await fetch(
-        "https://api.thecatapi.com/v1/images/search?mime_types=gif"
+        "https://api.thedogapi.com/v1/images/search?mime_types=gif"
       );
       const data = await response.json();
       gifQueue.add(data[0].url);
