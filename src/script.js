@@ -20,15 +20,23 @@ const getParam = (param) => {
   return url.searchParams.get(param);
 };
 
+const client = new tmi.client({
+  channels: [getParam("channel")],
+  connection: {
+    secure: true,
+  },
+});
+
+client.connect();
+
 // Command handlers
-ComfyJS.onCommand = (user, command, message, flags, extra) => {
+client.on("message", (channel, tags, message) => {
   commands.forEach((command) => {
-    if (command.command === command) {
-      if (command.condition(message, flags, extra)) {
-        command.handler(message, flags, extra);
-      }
+    if (
+      message.startsWith(command.command) &&
+      command.condition(tags, message)
+    ) {
+      command.handler(tags, message);
     }
   });
-};
-
-ComfyJS.Init(getParam("channel"));
+});

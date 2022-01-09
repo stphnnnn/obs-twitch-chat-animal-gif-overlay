@@ -3,10 +3,10 @@ const commands = [
     command: "!catpls",
     condition: () => true,
     handler: async () => {
-      const repsonse = await fetch(
+      const response = await fetch(
         "https://api.thecatapi.com/v1/images/search?mime_types=gif"
       );
-      const data = await repsonse.json();
+      const data = await response.json();
       gifQueue.add(data[0].url);
     },
   },
@@ -14,10 +14,10 @@ const commands = [
     command: "!dogpls",
     condition: () => true,
     handler: async () => {
-      const repsonse = await fetch(
+      const response = await fetch(
         "https://api.thecatapi.com/v1/images/search?mime_types=gif"
       );
-      const data = await repsonse.json();
+      const data = await response.json();
       gifQueue.add(data[0].url);
     },
   },
@@ -25,14 +25,14 @@ const commands = [
     command: "!inspirepls",
     condition: () => true,
     handler: async () => {
-      const repsonse = await fetch("https://inspirobot.me/api?generate=true");
-      const url = await repsonse.text();
+      const response = await fetch("https://inspirobot.me/api?generate=true");
+      const url = await response.text();
       gifQueue.add(url);
     },
   },
   {
     command: "!stoppls",
-    condition: (message, flags) => flags.broadcaster || flags.mod,
+    condition: (tags, message) => tags.badges.broadcaster || tags.mod,
     handler: () => {
       gifQueue.clear();
       gifQueue.pause(PAUSE_DURATION);
